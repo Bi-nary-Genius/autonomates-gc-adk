@@ -11,3 +11,7 @@ async def generate_scenario(id_token: str = Header(...)):
         return {"message": f"Scenario generated for user {user_id}"}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
+    
+@router.get("/")
+async def get_scenario():
+    return {"message": "GET scenario placeholder"}

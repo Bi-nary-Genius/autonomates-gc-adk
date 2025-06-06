@@ -6,7 +6,7 @@ app = FastAPI()
 app.include_router(scenario.router, prefix="/scenario")
 app.include_router(tts.router, prefix="/tts")
 app.include_router(nlu.router, prefix="/nlu")
-app.include_router(voice_cloning.router, prefix="/voice")
+app.include_router(voice_cloning.router, prefix="/voice_cloning")
 @app.get("/")
 async def root():
     return {"message": "WhatIf Backend is running!"}
