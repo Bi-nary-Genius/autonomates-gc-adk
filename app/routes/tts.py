@@ -11,3 +11,7 @@ async def text_to_speech(id_token: str = Header(...)):
         return {"message": f"TTS request processed for user {user_id}"}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+@router.get("/")
+async def get_tts():
+    return {"message": "GET TTS placeholder"}
