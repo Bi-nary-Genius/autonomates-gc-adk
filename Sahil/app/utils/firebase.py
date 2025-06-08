@@ -7,16 +7,12 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-# Example: Add a document
-doc_ref = db.collection("users").document("user1")
-doc_ref.set({
+data={
     "name": "Sahil Gupta",
     "email": "sahil@example.com"
-})
+}
+# Example: Add a document
+doc_ref = db.collection("users").document()
+doc_ref.set(data)
+print('Document:', doc_ref.id)
 
-# Example: Get a document
-doc = doc_ref.get()
-if doc.exists:
-    print(f"Document data: {doc.to_dict()}")
-else:
-    print("No such document!")
