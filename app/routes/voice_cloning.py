@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Header
-from app.auth import verify_token
+from app.auth import verify_id_token
 import uuid
 
 router = APIRouter()
@@ -14,7 +14,7 @@ def mock_clone_voice(text: str, user_id: str) -> str:
 @router.post("/")
 async def clone_voice(input: dict, id_token: str = Header(...)):
     try:
-        user_id = verify_token(id_token)
+        user_id = verify_id_token(id_token)
         text = input.get("text", "")
         if not text:
             raise HTTPException(status_code=400, detail="Text input is required")
@@ -39,7 +39,7 @@ async def clone_voice(input: dict, id_token: str = Header(...)):
 @router.get("/{vc_id}")
 async def get_voice_cloning(vc_id: str, id_token: str = Header(...)):
     try:
-        user_id = verify_token(id_token)
+        user_id = verify_id_token(id_token)
 
         if vc_id not in vc_store:
             raise HTTPException(status_code=404, detail="Voice clone result not found")
@@ -56,7 +56,7 @@ async def get_voice_cloning(vc_id: str, id_token: str = Header(...)):
 @router.delete("/{vc_id}")
 async def delete_voice_cloning(vc_id: str, id_token: str = Header(...)):
     try:
-        user_id = verify_token(id_token)
+        user_id = verify_id_token(id_token)
 
         if vc_id not in vc_store:
             raise HTTPException(status_code=404, detail="Voice clone result not found")

@@ -1,74 +1,100 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Header, Depends
-from app.auth import verify_token
+# SC: Added Form to handle form data from the frontend
+from fastapi import APIRouter, File, UploadFile, HTTPException, Header, Form
+from app.auth import verify_id_token
 import uuid
+import time  # SC: Added time to simulate AI processing delay
 
-router = APIRouter(prefix="/photo_upload")
+router = APIRouter()
 
-# Simulated in-memory store for photo analysis results
-photo_store = {}
+# SC: Renamed from photo_store to scenario_store for clarity
+scenario_store = {}
 
-# Mocked call to Vertex AI Vision (replace with actual client logic later)
-def mock_vision_classify(image_bytes: bytes):
-    # Fake result
-    return ["beach", "sunset", "vacation"]
+
+# SC: This function is no longer needed for the new scenario creation logic
+# def mock_vision_classify(image_bytes: bytes):
+#     # Fake result
+#     return ["beach", "sunset", "vacation"]
 
 @router.post("/")
-async def upload_photo(
-    file: UploadFile = File(...),
-    id_token: str = Header(...)
+# SC: Renamed function and added title and keywords from the form & changed the name of the file parameter
+async def create_scenario_with_photo(
+        photo: UploadFile = File(...),
+        id_token: str = Header(...),
+        title: str = Form(...),
+        keywords: str = Form(...)
 ):
     try:
-        user_id = verify_token(id_token)
-        contents = await file.read()
-        labels = mock_vision_classify(contents)
+        user_id = verify_id_token(id_token)
 
-        photo_id = str(uuid.uuid4())
-        photo_store[photo_id] = {
+        # SC: New logic to create a mock scenario instead of classifying the image
+        print(f"User '{user_id}' is creating a scenario titled '{title}' with photo '{photo.filename}'.")
+
+        # SC: Simulate a delay as if AI is working
+        time.sleep(2)
+
+        # SC: Create a fake AI response based on keywords
+        mock_ai_description = f"This is a mock AI-generated scenario based on the keywords: {keywords}."
+        scenario_id = str(uuid.uuid4())
+
+        # SC: Store the new scenario data structure
+        scenario_store[scenario_id] = {
             "user_id": user_id,
-            "filename": file.filename,
-            "labels": labels
+            "title": title,
+            "keywords": keywords,
+            "description": mock_ai_description,
+            "imageUrl": "https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            # Placeholder image
+            "original_filename": photo.filename
         }
 
+        # SC: Return the data structure the frontend is now expecting
         return {
-            "id": photo_id,
-            "filename": file.filename,
-            "labels": labels
+            "id": scenario_id,
+            "title": title,
+            "description": mock_ai_description,
+            "imageUrl": scenario_store[scenario_id]["imageUrl"]
         }
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        # SC: Updated error handling to be more generic for this endpoint
+        print(f"Error in create_scenario_with_photo endpoint: {e}")
+        raise HTTPException(status_code=400, detail=f"Could not process request: {e}")
 
-@router.get("/{photo_id}")
-async def get_photo_result(photo_id: str, id_token: str = Header(...)):
+
+# SC: Renamed function for clarity
+@router.get("/{scenario_id}")
+async def get_scenario_result(scenario_id: str, id_token: str = Header(...)):
     try:
-        user_id = verify_token(id_token)
+        user_id = verify_id_token(id_token)
 
-        if photo_id not in photo_store:
-            raise HTTPException(status_code=404, detail="Photo result not found")
+        if scenario_id not in scenario_store:
+            raise HTTPException(status_code=404, detail="Scenario result not found")
 
-        record = photo_store[photo_id]
+        record = scenario_store[scenario_id]
         if record["user_id"] != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to access this photo")
+            raise HTTPException(status_code=403, detail="Not authorized to access this scenario")
 
         return record
 
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
 
-@router.delete("/{photo_id}")
-async def delete_photo(photo_id: str, id_token: str = Header(...)):
+
+# SC: Renamed function for clarity
+@router.delete("/{scenario_id}")
+async def delete_scenario(scenario_id: str, id_token: str = Header(...)):
     try:
-        user_id = verify_token(id_token)
+        user_id = verify_id_token(id_token)
 
-        if photo_id not in photo_store:
-            raise HTTPException(status_code=404, detail="Photo not found")
+        if scenario_id not in scenario_store:
+            raise HTTPException(status_code=404, detail="Scenario not found")
 
-        record = photo_store[photo_id]
+        record = scenario_store[scenario_id]
         if record["user_id"] != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to delete this photo")
+            raise HTTPException(status_code=403, detail="Not authorized to delete this scenario")
 
-        del photo_store[photo_id]
-        return {"message": f"Photo {photo_id} deleted successfully"}
+        del scenario_store[scenario_id]
+        return {"message": f"Scenario {scenario_id} deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))

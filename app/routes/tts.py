@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header
-from app.auth import verify_token
+from app.auth import verify_id_token
+
+
 import uuid
 
 router = APIRouter()
@@ -14,7 +16,7 @@ def mock_generate_audio_url(text: str) -> str:
 @router.post("/")
 async def text_to_speech(input: dict, id_token: str = Header(...)):
     try:
-        user_id = verify_token(id_token)
+        user_id = verify_id_token(id_token)
         text = input.get("text", "")
         if not text:
             raise HTTPException(status_code=400, detail="Text input is required")
@@ -39,7 +41,7 @@ async def text_to_speech(input: dict, id_token: str = Header(...)):
 @router.get("/{tts_id}")
 async def get_tts(tts_id: str, id_token: str = Header(...)):
     try:
-        user_id = verify_token(id_token)
+        user_id = verify_id_token(id_token)
 
         if tts_id not in tts_store:
             raise HTTPException(status_code=404, detail="TTS result not found")
@@ -56,7 +58,7 @@ async def get_tts(tts_id: str, id_token: str = Header(...)):
 @router.delete("/{tts_id}")
 async def delete_tts(tts_id: str, id_token: str = Header(...)):
     try:
-        user_id = verify_token(id_token)
+        user_id = verify_id_token(id_token)
 
         if tts_id not in tts_store:
             raise HTTPException(status_code=404, detail="TTS result not found")
