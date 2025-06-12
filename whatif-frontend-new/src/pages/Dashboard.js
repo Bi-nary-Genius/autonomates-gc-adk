@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import PhotoUploader from '../components/PhotoUploader';
 import Card from '../components/Card';
+import EditModal from '../components/EditModal';
 import './Dashboard.css';
 
 function Dashboard({ user }) {
   const [scenarios, setScenarios] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentScenario, setCurrentScenario] = useState(null);
 
-  /* Fetch scenarios whenever `user` changes */
   useEffect(() => {
     const fetchScenarios = async () => {
       if (!user) {
@@ -16,16 +18,13 @@ function Dashboard({ user }) {
         setIsLoading(false);
         return;
       }
-
       setIsLoading(true);
       setFetchError(false);
-
       try {
         const idToken = await user.getIdToken();
         const res = await fetch('http://localhost:8000/photo_upload/', {
           headers: { 'id-token': idToken }
         });
-
         if (!res.ok) throw new Error('Failed to fetch scenarios');
         setScenarios(await res.json());
       } catch (err) {
@@ -35,42 +34,26 @@ function Dashboard({ user }) {
         setIsLoading(false);
       }
     };
-
     fetchScenarios();
   }, [user]);
 
-  /* This function now makes a real API call to delete the scenario */
   const handleDelete = async (scenarioIdToDelete) => {
-    // Optional: Add a confirmation dialog for a better user experience
-    if (!window.confirm("Are you sure you want to permanently delete this scenario?")) {
+    if (!window.confirm("Are you sure you want to permanently delete this scenario?")) return;
+    if (!user) {
+      alert("You must be logged in to delete scenarios.");
       return;
     }
-
-    if (!user) {
-        alert("You must be logged in to delete scenarios.");
-        return;
-    }
-
     try {
-        const idToken = await user.getIdToken();
-        const response = await fetch(`http://localhost:8000/photo_upload/${scenarioIdToDelete}`, {
-            method: 'DELETE',
-            headers: {
-                'id-token': idToken,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete scenario from the server.');
-        }
-
-        // If the API call is successful, then remove the card from the UI
-        setScenarios((prev) => prev.filter((s) => s.id !== scenarioIdToDelete));
-        console.log(`Successfully deleted scenario ${scenarioIdToDelete}`);
-
+      const idToken = await user.getIdToken();
+      const response = await fetch(`http://localhost:8000/photo_upload/${scenarioIdToDelete}`, {
+        method: 'DELETE',
+        headers: { 'id-token': idToken },
+      });
+      if (!response.ok) throw new Error('Failed to delete scenario from the server.');
+      setScenarios((prev) => prev.filter((s) => s.id !== scenarioIdToDelete));
     } catch (error) {
-        console.error("Error deleting scenario:", error);
-        alert("There was an error deleting the scenario. Please try again.");
+      console.error("Error deleting scenario:", error);
+      alert("There was an error deleting the scenario. Please try again.");
     }
   };
 
@@ -82,7 +65,52 @@ function Dashboard({ user }) {
     alert(`Playing audio for: ${scenario.title}`);
   };
 
-  /* ---------- RENDER ---------- */
+  const handleOpenEditModal = (scenario) => {
+    setCurrentScenario(scenario);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentScenario(null);
+  };
+
+  // This function is now updated to make a real API call.
+  const handleSaveChanges = async (updatedScenario) => {
+    if (!user) {
+        alert("You must be logged in to save changes.");
+        return;
+    }
+
+    try {
+        const idToken = await user.getIdToken();
+        const response = await fetch(`http://localhost:8000/photo_upload/${updatedScenario.id}`, {
+            method: 'PUT', // Use the PUT method to update
+            headers: {
+                'id-token': idToken,
+                'Content-Type': 'application/json',
+            },
+            // Send only the title and prompt in the request body
+            body: JSON.stringify({
+                title: updatedScenario.title,
+                prompt: updatedScenario.prompt,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save changes to the server.');
+        }
+
+        // If the API call is successful, update the card in the UI
+        setScenarios(scenarios.map(s => s.id === updatedScenario.id ? updatedScenario : s));
+        handleCloseModal(); // Close the modal on success
+
+    } catch (error) {
+        console.error("Error saving changes:", error);
+        alert("There was an error saving your changes. Please try again.");
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <div className="scenario-creator-panel glass-panel">
@@ -97,9 +125,7 @@ function Dashboard({ user }) {
         {isLoading ? (
           <p>Loading scenarios…</p>
         ) : fetchError ? (
-          <p style={{ color: 'red' }}>
-            Sorry—couldn’t load your scenarios. Please try again.
-          </p>
+          <p style={{ color: 'red' }}>Could not load scenarios.</p>
         ) : scenarios.length === 0 ? (
           <div className="empty-state">
             <h3>Welcome to Your Workspace</h3>
@@ -111,20 +137,23 @@ function Dashboard({ user }) {
               <Card
                 key={s.id}
                 title={s.title}
-                description={
-                  s.prompt ||
-                  (s.ai_labels?.length
-                    ? `AI tags: ${s.ai_labels.join(', ')}`
-                    : 'No description provided.')
-                }
+                description={ s.prompt || (s.ai_labels?.length ? `AI tags: ${s.ai_labels.join(', ')}` : 'No description provided.') }
                 imageUrl={s.imageUrl}
                 onDelete={() => handleDelete(s.id)}
                 onPlay={() => handlePlayAudio(s)}
+                onEdit={() => handleOpenEditModal(s)}
               />
             ))}
           </div>
         )}
       </div>
+
+      <EditModal
+        isOpen={isModalOpen}
+        onRequestClose={handleCloseModal}
+        scenario={currentScenario}
+        onSave={handleSaveChanges}
+      />
     </div>
   );
 }
