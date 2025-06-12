@@ -1,28 +1,13 @@
+/* In src/pages/Dashboard.css */
 
-
-
-.dashboard-layout {
-  display: flex;
+.dashboard-container {
+  display: flex; /* This is the line that creates your columns */
+  padding: 40px;
+  gap: 40px;
+  min-height: 100vh;
   background-color: #121212;
   color: #e0e0e0;
-  min-height: 100vh;
-  padding-top: 70px;
 }
-
-.dashboard-main-content {
-  flex-grow: 1;
-
-  margin-left: 240px;
-  padding: 2rem;
-}
-
-.dashboard-panels {
-  display: flex;
-  gap: 40px;
-}
-
-
-
 
 .scenario-creator-panel {
   flex: 1;
