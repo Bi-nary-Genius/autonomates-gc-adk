@@ -6,7 +6,7 @@ import './PhotoUploader.css';
 export default function PhotoUploader({ onScenarioCreated, user }) {
   const [files, setFiles] = useState([]);
   const [title, setTitle] = useState('');
-  // Replaced 'keywords' with 'prompt' for more flexible input
+  // Replaced 'keywords' with 'prompt'
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +36,6 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Using your excellent validation logic
     if (!title || (!prompt.trim() && files.length === 0)) {
         alert('Please provide a title, and either a prompt or at least one photo.');
         return;
@@ -65,6 +64,7 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
       onScenarioCreated(data);
+      // Clear the form after a successful submission
       setFiles([]);
       setTitle('');
       setPrompt('');
@@ -116,7 +116,7 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
           </div>
         )}
 
-        <button type="submit" className="generate-button" disabled={isLoading}>
+        <button type="submit" className="generate-button" disabled={isLoading || !title}>
           {isLoading ? 'Analyzing...' : 'Generate Scenario'}
         </button>
       </form>
