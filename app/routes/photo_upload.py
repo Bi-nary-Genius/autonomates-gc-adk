@@ -1,100 +1,104 @@
-# SC: Added Form to handle form data from the frontend
 from fastapi import APIRouter, File, UploadFile, HTTPException, Header, Form
-from app.auth import verify_id_token
+from app.auth import verify_id_token, db       # firestore comes from firebase_admin
+from firebase_admin import firestore           # import firestore directly
 import uuid
-import time  # SC: Added time to simulate AI processing delay
+from typing import List, Optional
+from google.cloud.vision import ImageAnnotatorClient, Image
 
 router = APIRouter()
 
-# SC: Renamed from photo_store to scenario_store for clarity
-scenario_store = {}
+# -------------- Vision helper --------------
+def get_image_labels(image_bytes: bytes) -> list:
+    client = ImageAnnotatorClient()
+    image = Image(content=image_bytes)
+    response = client.label_detection(image=image)
+    if response.error.message:
+        raise Exception(f"Vision API error: {response.error.message}")
+    return [label.description for label in response.label_annotations]
 
-
-# SC: This function is no longer needed for the new scenario creation logic
-# def mock_vision_classify(image_bytes: bytes):
-#     # Fake result
-#     return ["beach", "sunset", "vacation"]
-
+# -------------- CREATE ---------------------
 @router.post("/")
-# SC: Renamed function and added title and keywords from the form & changed the name of the file parameter
-async def create_scenario_with_photo(
-        photo: UploadFile = File(...),
-        id_token: str = Header(...),
-        title: str = Form(...),
-        keywords: str = Form(...)
+async def create_scenario(
+    photos: Optional[List[UploadFile]] = File(None),
+    id_token: str = Header(...),
+    title: str = Form(...),
+    prompt: str = Form(...)
 ):
     try:
         user_id = verify_id_token(id_token)
+        ai_labels = []
+        original_filenames = []
 
-        # SC: New logic to create a mock scenario instead of classifying the image
-        print(f"User '{user_id}' is creating a scenario titled '{title}' with photo '{photo.filename}'.")
+        if photos:
+            first_photo = photos[0]
+            ai_labels = get_image_labels(await first_photo.read())
+            original_filenames = [p.filename for p in photos]
+            print(f"User {user_id} uploaded {len(photos)} photo(s).")
+        else:
+            print(f"User {user_id} created a text-only scenario.")
 
-        # SC: Simulate a delay as if AI is working
-        time.sleep(2)
-
-        # SC: Create a fake AI response based on keywords
-        mock_ai_description = f"This is a mock AI-generated scenario based on the keywords: {keywords}."
         scenario_id = str(uuid.uuid4())
-
-        # SC: Store the new scenario data structure
-        scenario_store[scenario_id] = {
+        scenario_data = {
             "user_id": user_id,
             "title": title,
-            "keywords": keywords,
-            "description": mock_ai_description,
-            "imageUrl": "https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-            # Placeholder image
-            "original_filename": photo.filename
+            "prompt": prompt,
+            "imageUrl": "https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg"
+                        if photos else
+                        "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg",
+            "original_filenames": original_filenames,
+            "ai_labels": ai_labels,
+            "createdAt": firestore.SERVER_TIMESTAMP,
         }
+        db.collection("scenarios").document(scenario_id).set(scenario_data)
 
-        # SC: Return the data structure the frontend is now expecting
         return {
             "id": scenario_id,
             "title": title,
-            "description": mock_ai_description,
-            "imageUrl": scenario_store[scenario_id]["imageUrl"]
+            "description": (
+                f"AI tags: {', '.join(ai_labels)}"
+                if ai_labels
+                else f"Scenario based on prompt: \"{prompt[:50]}...\""
+            ),
+            "imageUrl": scenario_data["imageUrl"],
+            "labels": ai_labels,
         }
 
     except Exception as e:
-        # SC: Updated error handling to be more generic for this endpoint
-        print(f"Error in create_scenario_with_photo endpoint: {e}")
+        print(f"Create scenario error: {e}")
         raise HTTPException(status_code=400, detail=f"Could not process request: {e}")
 
-
-# SC: Renamed function for clarity
-@router.get("/{scenario_id}")
-async def get_scenario_result(scenario_id: str, id_token: str = Header(...)):
+# -------------- READ -----------------------
+@router.get("/")
+async def get_scenarios(id_token: str = Header(...)):
     try:
         user_id = verify_id_token(id_token)
-
-        if scenario_id not in scenario_store:
-            raise HTTPException(status_code=404, detail="Scenario result not found")
-
-        record = scenario_store[scenario_id]
-        if record["user_id"] != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to access this scenario")
-
-        return record
-
+        docs = (
+            db.collection("scenarios")
+            .where("user_id", "==", user_id)
+            .order_by("createdAt", direction=firestore.Query.DESCENDING)
+            .stream()
+        )
+        scenarios = [{**d.to_dict(), "id": d.id} for d in docs]
+        return scenarios
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        print(f"Fetch scenarios error: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch scenarios")
 
-
-# SC: Renamed function for clarity
+# -------------- DELETE ---------------------
 @router.delete("/{scenario_id}")
 async def delete_scenario(scenario_id: str, id_token: str = Header(...)):
     try:
         user_id = verify_id_token(id_token)
+        doc_ref = db.collection("scenarios").document(scenario_id)
+        doc = doc_ref.get()
 
-        if scenario_id not in scenario_store:
+        if not doc.exists:
             raise HTTPException(status_code=404, detail="Scenario not found")
+        if doc.to_dict().get("user_id") != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized")
 
-        record = scenario_store[scenario_id]
-        if record["user_id"] != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to delete this scenario")
-
-        del scenario_store[scenario_id]
+        doc_ref.delete()
         return {"message": f"Scenario {scenario_id} deleted successfully"}
-
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        print(f"Delete scenario error: {e}")
+        raise HTTPException(status_code=500, detail=f"Could not delete scenario: {e}")

@@ -1,55 +1,70 @@
-import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { getAuth, onAuthStateChanged, getIdToken } from "firebase/auth";
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
+import LandingPage from './pages/LandingPage';
+import Dashboard from './pages/Dashboard';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import SettingsPrivacy from './pages/SettingsPrivacy';
+import SignIn from './pages/SignIn';
 
-
-import LandingPage from "./pages/LandingPage";
-import Dashboard from "./pages/Dashboard";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import SettingsPrivacy from "./pages/SettingsPrivacy";
-import SignIn from "./pages/SignIn";
-
+// The main App component now handles authentication state directly.
 function App() {
-  // --- NEW: Add this useEffect hook to listen for auth changes ---
-  // This code will run once when the app loads.
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Hooks from react-router-dom must be used within a component descendant of <Router>
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // This hook listens for changes to the user's login state.
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // This block runs if the user is logged in
-        console.log("User is signed in. Getting a fresh ID Token...");
-        getIdToken(user, /* forceRefresh: true */).then((idToken) => {
-          // This is the token you need for Postman!
-          console.log("✅ Your fresh ID Token is:", idToken);
-        }).catch((error) => {
-          console.error("Error getting token:", error);
-        });
-      } else {
-        // This block runs if the user is signed out
-        console.log("User is signed out.");
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+
+      // Logic for automatic redirection
+      if (currentUser && (location.pathname === '/signin' || location.pathname === '/')) {
+        navigate('/dashboard');
       }
     });
 
-    // This cleans up the listener when the component is no longer on the screen
+    // Cleanup the listener when the component unmounts
     return () => unsubscribe();
-  }, []); // The empty array [] means this effect runs only once.
-  // -------------------------------------------------------------
+  }, [navigate, location.pathname]);
+
+  // Display a loading message until Firebase has confirmed the auth state.
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#121212', color: 'white' }}>
+        <h2>Loading Application...</h2>
+      </div>
+    );
+  }
 
   return (
-    <Router>
-      <Routes>
-        {/* Root route shows the landing page */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/settings" element={<SettingsPrivacy />} />
-        <Route path="/signin" element={<SignIn />} /> {/* 👈 add SignIn route */}
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      {/* The 'user' object is now passed directly as a prop to the Dashboard */}
+      <Route path="/dashboard" element={<Dashboard user={user} />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/settings" element={<SettingsPrivacy />} />
+      <Route path="/signin" element={<SignIn />} />
+    </Routes>
   );
 }
 
-export default App;
+// A new Root component wraps the App to provide the necessary Router context.
+// This allows the App component itself to use navigation hooks.
+function Root() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  )
+}
+
+export default Root;

@@ -1,7 +1,7 @@
-/* src/pages/Dashboard.css */
+/* In src/pages/Dashboard.css */
 
 .dashboard-container {
-  display: flex;
+  display: flex; /* This is the line that creates your columns */
   padding: 40px;
   gap: 40px;
   min-height: 100vh;
@@ -10,15 +10,14 @@
 }
 
 .scenario-creator-panel {
-  flex: 1; /* Both columns will now be of equal width */
-  min-width: 400px; /* Prevents the uploader from getting too squished */
+  flex: 1;
+  min-width: 400px;
 }
 
 .info-panel {
-  flex: 2; /* The right column will be twice as wide */
+  flex: 2;
 }
 
-/* This is the class for our new grid */
 .card-grid {
   margin-top: 30px;
   display: grid;
@@ -26,7 +25,6 @@
   gap: 25px;
 }
 
-/* The glass panel effect we discussed */
 .glass-panel {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -34,4 +32,10 @@
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 30px;
+}
+
+.empty-state {
+  margin-top: 40px;
+  text-align: center;
+  color: #888;
 }
