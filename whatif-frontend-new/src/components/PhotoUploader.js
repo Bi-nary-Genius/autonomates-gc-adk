@@ -1,14 +1,17 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { getAuth } from "firebase/auth";
 import './PhotoUploader.css';
+import VoiceRecorder from './VoiceRecorder';
+
 
 export default function PhotoUploader({ onScenarioCreated, user }) {
   const [files, setFiles] = useState([]);
   const [title, setTitle] = useState('');
-  // Replaced 'keywords' with 'prompt'
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunks = useRef([]);
 
   const maxFiles = 10;
 
@@ -33,6 +36,55 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
     multiple: true,
   });
 
+  const handleRecordToggle = async () => {
+    if (!recording) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        mediaRecorderRef.current.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.current.push(e.data);
+        };
+        mediaRecorderRef.current.onstop = handleStopRecording;
+
+        audioChunks.current = [];
+        mediaRecorderRef.current.start();
+        setRecording(true);
+      } catch (err) {
+        alert("Mic access denied or not supported.");
+        console.error("Mic error:", err);
+      }
+    } else {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+    }
+  };
+
+  const handleStopRecording = async () => {
+    const blob = new Blob(audioChunks.current, { type: 'audio/webm' });
+    const formData = new FormData();
+    formData.append("file", blob);
+
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch("http://localhost:8000/speech-to-text/", {
+        method: "POST",
+        headers: {
+          "id-token": idToken
+        },
+        body: formData
+      });
+      const data = await response.json();
+      if (data.transcript) {
+        setPrompt(data.transcript);
+      } else {
+        alert("No transcript returned.");
+      }
+    } catch (error) {
+      console.error("Transcription error:", error);
+      alert("Failed to convert voice to text.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -52,7 +104,7 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
 
     files.forEach(file => formData.append('photos', file));
     formData.append('title', title);
-    formData.append('prompt', prompt); // Sending 'prompt' instead of 'keywords'
+    formData.append('prompt', prompt);
 
     try {
       const res = await fetch('http://localhost:8000/photo_upload/', {
@@ -64,7 +116,6 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
       onScenarioCreated(data);
-      // Clear the form after a successful submission
       setFiles([]);
       setTitle('');
       setPrompt('');
@@ -84,7 +135,6 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
           <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., Patient XYZ - Post-Op Analysis" required />
         </div>
 
-        {/* Replaced 'Keywords' input with a 'Prompt' textarea */}
         <div className="form-group">
           <label htmlFor="prompt">Your "What If" Prompt:</label>
           <textarea
@@ -96,6 +146,10 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
             style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid #444', borderRadius: '8px', color: '#e0e0e0', fontSize: '1rem' }}
           />
         </div>
+
+        <button type="button" onClick={handleRecordToggle} className="record-button">
+          {recording ? 'Stop Recording 🎤' : 'Speak Prompt 🎙️'}
+        </button>
 
         <div {...getRootProps({ className: `dropzone ${isDragActive ? 'active' : ''}` })}>
           <input {...getInputProps()} />
