@@ -1,0 +1,56 @@
+
+
+
+.dashboard-layout {
+  display: flex;
+  background-color: #121212;
+  color: #e0e0e0;
+  min-height: 100vh;
+  padding-top: 70px;
+}
+
+.dashboard-main-content {
+  flex-grow: 1;
+
+  margin-left: 240px;
+  padding: 2rem;
+}
+
+.dashboard-panels {
+  display: flex;
+  gap: 40px;
+}
+
+
+
+
+.scenario-creator-panel {
+  flex: 1;
+  min-width: 400px;
+}
+
+.info-panel {
+  flex: 2;
+}
+
+.card-grid {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 30px;
+}
+
+.empty-state {
+  margin-top: 40px;
+  text-align: center;
+  color: #888;
+}
