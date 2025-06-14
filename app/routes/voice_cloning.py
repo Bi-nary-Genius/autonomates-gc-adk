@@ -1,72 +1,52 @@
 from fastapi import APIRouter, HTTPException, Header
-from app.auth import verify_id_token
+from app.auth import verify_id_token, db
 import uuid
+import google.generativeai as genai
 
 router = APIRouter()
 
-# Simulated in-memory storage for voice cloning results
-vc_store = {}
+# Initialize Gemini with your real API key
+genai.configure(api_key="AIzaSyB_BrOTUK-dAo5eEu3JNy2-MGjp-nzc7tg")
+model = genai.GenerativeModel("gemini-pro")
 
-def mock_clone_voice(text: str, user_id: str) -> str:
-    # Mock result: URL to synthesized voice using cloned voice profile
-    return f"https://mock-voice.com/clone/{user_id}/{uuid.uuid4()}.mp3"
+# Voice cloning logic (simplified version)
+def generate_voice_clone_text(prompt: str) -> str:
+    try:
+        full_prompt = (
+            f"You are a voice cloning system. Take the following text and transform it into an expressive, natural spoken style:\n\n{prompt}"
+        )
+        response = model.generate_content(full_prompt)
+        return response.text
+    except Exception as e:
+        print(f"Gemini error: {e}")
+        raise Exception("Failed to generate voice clone text")
 
 @router.post("/")
-async def clone_voice(input: dict, id_token: str = Header(...)):
+async def voice_clone(input: dict, id_token: str = Header(...)):
     try:
         user_id = verify_id_token(id_token)
-        text = input.get("text", "")
-        if not text:
-            raise HTTPException(status_code=400, detail="Text input is required")
+        prompt = input.get("prompt", "").strip()
 
-        cloned_audio_url = mock_clone_voice(text, user_id)
-        vc_id = str(uuid.uuid4())
+        if not prompt:
+            raise HTTPException(status_code=400, detail="Prompt is required.")
 
-        vc_store[vc_id] = {
+        cloned_text = generate_voice_clone_text(prompt)
+        voice_clone_id = str(uuid.uuid4())
+
+        record = {
             "user_id": user_id,
-            "text": text,
-            "voice_url": cloned_audio_url
+            "original_prompt": prompt,
+            "cloned_text": cloned_text
         }
+        db.collection("voice_clones").document(voice_clone_id).set(record)
 
         return {
-            "id": vc_id,
-            "voice_url": cloned_audio_url
+            "id": voice_clone_id,
+            "cloned_text": cloned_text
         }
 
-    except Exception as e:
+    except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
-
-@router.get("/{vc_id}")
-async def get_voice_cloning(vc_id: str, id_token: str = Header(...)):
-    try:
-        user_id = verify_id_token(id_token)
-
-        if vc_id not in vc_store:
-            raise HTTPException(status_code=404, detail="Voice clone result not found")
-
-        record = vc_store[vc_id]
-        if record["user_id"] != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to access this result")
-
-        return record
-
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
-
-@router.delete("/{vc_id}")
-async def delete_voice_cloning(vc_id: str, id_token: str = Header(...)):
-    try:
-        user_id = verify_id_token(id_token)
-
-        if vc_id not in vc_store:
-            raise HTTPException(status_code=404, detail="Voice clone result not found")
-
-        record = vc_store[vc_id]
-        if record["user_id"] != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to delete this result")
-
-        del vc_store[vc_id]
-        return {"message": f"Voice clone result {vc_id} deleted successfully"}
-
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        print(f"Voice cloning error: {e}")
+        raise HTTPException(status_code=400, detail="Could not process voice cloning request.")

@@ -39,3 +39,24 @@
   text-align: center;
   color: #888;
 }
+
+.dashboard-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 40px 0 40px;
+}
+
+.logout-button {
+  background-color: #1f80e0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #1464b0;
+}

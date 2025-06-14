@@ -1,70 +1,96 @@
-
-
-from fastapi import APIRouter, HTTPException, Header
-from app.auth import verify_id_token
-import uuid # Keep this import from the 'main' branch
+from fastapi import APIRouter, File, UploadFile, HTTPException, Header, Form
+from app.auth import verify_id_token, db
+from firebase_admin import firestore
+import uuid
+from typing import List, Optional
+from google.cloud import vision, language_v1
+import google.generativeai as genai
 
 router = APIRouter()
 
-# Keep the in-memory storage from the 'main' branch
-scenario_store = {}
+# Google AI Studio Key
+genai.configure(api_key="AIzaSyB_BrOTUK-dAo5eEu3JNy2-MGjp-nzc7tg")
 
-def generate_scenario_text(keywords: list) -> str:
-    # Keep the scenario generation logic from 'main'
-    return f"What if you changed your life around {' and '.join(keywords)}?"
+# Gemini model id 
+vertex_model = genai.GenerativeModel(model_name="models/gemini-1.5-flash")
 
-@router.post('/')
-async def generate_scenario(id_token: str = Header(...), keywords: list = Header(...)):
-    """
-    This is the complete POST endpoint from the 'main' branch.
-    It generates a scenario, stores it, and returns the result.
-    """
+# can also use gemini-1.5-pro ，if quota supported
+# vertex_model = genai.GenerativeModel(model_name="models/gemini-1.5-pro")
+
+vision_client = vision.ImageAnnotatorClient()
+language_client = language_v1.LanguageServiceClient()
+
+# Vision API
+def get_image_labels(image_bytes: bytes) -> list:
     try:
-        user_id = verify_id_token(id_token)
-        if not keywords:
-            raise HTTPException(status_code=400, detail="Keywords cannot be empty")
-
-        scenario_text = generate_scenario_text(keywords)
-        scenario_id = str(uuid.uuid4())
-
-        scenario_store[scenario_id] = {
-            "user_id": user_id,
-            "keywords": keywords,
-            "scenario": scenario_text
-        }
-
-        return {
-            "id": scenario_id,
-            "scenario": scenario_text
-        }
-
+        image = vision.Image(content=image_bytes)
+        response = vision_client.label_detection(image=image)
+        if response.error.message:
+            raise Exception(f"Vision API error: {response.error.message}")
+        return [label.description for label in response.label_annotations]
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        print(f"Error calling Vision AI: {e}")
+        raise Exception("Failed to get analysis from Vision AI.")
 
+# Gemini Generative AI
+def generate_scenario_story(prompt: str) -> str:
+    full_prompt = f"Based on this memory: '{prompt}', generate an immersive 'What If' scenario story:"
+    response = vertex_model.generate_content(full_prompt)
+    return response.text
 
-@router.get('/{scenario_id}')
-async def get_scenario(scenario_id: str, id_token: str = Header(...)):
-    # Keep the GET endpoint from the 'main' branch
-    verify_id_token(id_token)
-    if scenario_id in scenario_store:
-        return scenario_store[scenario_id]
+# Natural Language API
+def analyze_mood(text: str) -> str:
+    document = language_v1.Document(content=text, type_=language_v1.Document.Type.PLAIN_TEXT)
+    sentiment = language_client.analyze_sentiment(request={'document': document}).document_sentiment
+    score = sentiment.score
+
+    if score >= 0.5:
+        return "happy"
+    elif score <= -0.3:
+        return "sad"
     else:
-        raise HTTPException(status_code=404, detail="Scenario not found")
+        return "nostalgic"
 
-
-@router.delete('/{item_id}')
-async def delete_scenario(item_id: str, id_token: str = Header(...)):
-    """
-    This is the new DELETE endpoint from your branch.
-    We are keeping this new functionality.
-    """
+# Create Scenario
+@router.post("/")
+async def create_scenario(
+        photos: Optional[List[UploadFile]] = File(None),
+        id_token: str = Header(...),
+        title: str = Form(...),
+        prompt: str = Form(...)
+):
     try:
         user_id = verify_id_token(id_token)
-        # Placeholder logic: Delete scenario given item_id
-        # In the future for our real app, we would verify the user_id owns the item_id
-        # before deleting from scenario_store.
-        print(f"User {user_id} requested to delete item {item_id}")
-        return {"message": f"Scenario {item_id} deleted for user"}
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        ai_labels = []
+        original_filenames = []
 
+        if photos:
+            first_photo = photos[0]
+            ai_labels = get_image_labels(await first_photo.read())
+            original_filenames = [p.filename for p in photos]
+
+        scenario_story = generate_scenario_story(prompt)
+        mood = analyze_mood(scenario_story)
+
+        scenario_id = str(uuid.uuid4())
+        scenario_data = {
+            "user_id": user_id,
+            "title": title,
+            "prompt": prompt,
+            "scenario_generated": scenario_story,
+            "mood": mood,
+            "imageUrl": "https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg" if photos else "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg",
+            "original_filenames": original_filenames,
+            "ai_labels": ai_labels,
+            "createdAt": firestore.SERVER_TIMESTAMP,
+        }
+        db.collection("scenarios").document(scenario_id).set(scenario_data)
+
+        response_data = scenario_data.copy()
+        response_data["id"] = scenario_id
+        response_data.pop("createdAt", None)
+
+        return response_data
+    except Exception as e:
+        print(f"Create scenario error: {e}")
+        raise HTTPException(status_code=400, detail=f"Could not process request: {e}")

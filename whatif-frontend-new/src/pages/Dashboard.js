@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PhotoUploader from '../components/PhotoUploader';
+import VoiceRecorder from '../components/VoiceRecorder';
 import Card from '../components/Card';
 import EditModal from '../components/EditModal';
 import './Dashboard.css';
+import { getAuth, signOut } from "firebase/auth";
 
 function Dashboard({ user }) {
   const [scenarios, setScenarios] = useState([]);
@@ -10,6 +12,18 @@ function Dashboard({ user }) {
   const [fetchError, setFetchError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentScenario, setCurrentScenario] = useState(null);
+
+  const handleSignOut = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        console.log("User signed out");
+        window.location.href = "/";
+      })
+      .catch((error) => {
+        console.error("Sign out error", error);
+      });
+  };
 
   useEffect(() => {
     const fetchScenarios = async () => {
@@ -75,7 +89,6 @@ function Dashboard({ user }) {
     setCurrentScenario(null);
   };
 
-  // This function is now updated to make a real API call.
   const handleSaveChanges = async (updatedScenario) => {
     if (!user) {
         alert("You must be logged in to save changes.");
@@ -85,12 +98,11 @@ function Dashboard({ user }) {
     try {
         const idToken = await user.getIdToken();
         const response = await fetch(`http://localhost:8000/photo_upload/${updatedScenario.id}`, {
-            method: 'PUT', // Use the PUT method to update
+            method: 'PUT',
             headers: {
                 'id-token': idToken,
                 'Content-Type': 'application/json',
             },
-            // Send only the title and prompt in the request body
             body: JSON.stringify({
                 title: updatedScenario.title,
                 prompt: updatedScenario.prompt,
@@ -101,9 +113,8 @@ function Dashboard({ user }) {
             throw new Error('Failed to save changes to the server.');
         }
 
-        // If the API call is successful, update the card in the UI
         setScenarios(scenarios.map(s => s.id === updatedScenario.id ? updatedScenario : s));
-        handleCloseModal(); // Close the modal on success
+        handleCloseModal();
 
     } catch (error) {
         console.error("Error saving changes:", error);
@@ -112,10 +123,18 @@ function Dashboard({ user }) {
   };
 
   return (
+    <>
+    <div className="dashboard-header">
+    <button onClick={handleSignOut} className="logout-button">Log Out</button>
+     </div>
     <div className="dashboard-container">
+
+
       <div className="scenario-creator-panel glass-panel">
         <h1>Build a New Scenario</h1>
         <PhotoUploader onScenarioCreated={handleNewScenario} user={user} />
+        <VoiceRecorder onScenarioCreated={handleNewScenario} user={user} />
+        
       </div>
 
       <div className="info-panel">
@@ -155,6 +174,7 @@ function Dashboard({ user }) {
         onSave={handleSaveChanges}
       />
     </div>
+    </>
   );
 }
 

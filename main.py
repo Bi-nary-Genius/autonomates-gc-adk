@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import scenario, tts, nlu, voice_cloning, photo_upload
+from app.routes import scenario, tts, nlu, voice_cloning, photo_upload, speech_to_text
 from app.auth import db
 
 app = FastAPI()
@@ -25,6 +25,7 @@ app.include_router(tts.router, prefix="/tts")
 app.include_router(nlu.router, prefix="/nlu")
 app.include_router(voice_cloning.router, prefix="/voice_cloning")
 app.include_router(photo_upload.router, prefix="/photo_upload") # No trailing slash
+app.include_router(speech_to_text.router, prefix="/speech-to-text", tags=["speech-to-text"])
 
 
 @app.get("/")
