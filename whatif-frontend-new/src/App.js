@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
+import DebugGetToken from './components/DebugGetToken';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import SettingsPrivacy from './pages/SettingsPrivacy';
@@ -48,6 +49,10 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       {/* The 'user' object is now passed directly as a prop to the Dashboard */}
+      <Route path="/dashboard" element={<>
+    <Dashboard user={user} />
+    <DebugGetToken />
+  </>} />
       <Route path="/dashboard" element={<Dashboard user={user} />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />

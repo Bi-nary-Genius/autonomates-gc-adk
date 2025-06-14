@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { auth } from "../firebase.js";
+import { auth } from "../firebase.js";  
 import {
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
-  getIdToken // Import getIdToken
+  onAuthStateChanged
 } from "firebase/auth";
 
-// This is a helper function to decode the token
+// Helper function to decode the token
 const decodeToken = (token) => {
   try {
     const payloadBase64 = token.split('.')[1];
@@ -25,18 +24,16 @@ const SignIn = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // When user is logged in, get and decode the token
-        getIdToken(currentUser).then((idToken) => {
-          console.log("✅ Fresh ID Token is:", idToken);
-          const decoded = decodeToken(idToken);
-          if (decoded) {
-            // This is the most important line!
-            console.warn("PROOF - Token Audience (aud):", decoded.aud);
-          }
-        });
+        
+        const idToken = await currentUser.getIdToken(true);
+        console.log("✅ Fresh ID Token is:", idToken);
+        const decoded = decodeToken(idToken);
+        if (decoded) {
+          console.warn("PROOF - Token Audience (aud):", decoded.aud);
+        }
       }
     });
     return () => unsubscribe();
