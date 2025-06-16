@@ -4,3 +4,18 @@ serviceAccountKey.json
 __pycache__/
 *.pyc
 *.jpeg
+
+# --- New lines you just added ---
+/whatif-frontend-new/
+/whatif-frontend/
+node_modules/
+package.json
+package-lock.json
+*.log
+temp/
+*.db.idea/
+venv/
+serviceAccountKey.json
+__pycache__/
+*.pyc
+*.jpeg
