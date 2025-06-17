@@ -1,0 +1,78 @@
+
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #2a2a2a;
+  padding: 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  outline: none;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+.modal h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: #ffffff;
+}
+
+
+.modal .form-group input,
+.modal .form-group textarea {
+  width: 100%;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid #555;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 1rem;
+}
+
+.modal .form-group textarea {
+    resize: vertical;
+}
+
+.modal-actions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.modal-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.modal-button:hover {
+  opacity: 0.85;
+}
+
+.cancel-button {
+  background-color: #555;
+  color: #ffffff;
+}
+
+.save-button {
+  background-color: #00aaff;
+  color: #ffffff;
+}
