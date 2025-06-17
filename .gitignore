@@ -1,7 +1,9 @@
+cat > .gitignore <<EOF
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# Node.js dependencies
 /node_modules/
+/whatif-frontend-new/node_modules/
 /.pnp
 .pnp.js
 
@@ -24,17 +26,11 @@ yarn-error.log*
 
 # backend venv & pycache
 .idea/
+.venv/
 venv/
+clean-gcp-env/
 serviceAccountKey.json
 __pycache__/
 *.pyc
-*.jpeg
+EOF
 
-# frontend cache (babel-loader, webpack, etc)
-.cache/
-.cache-loader/
-whatif-frontend-new/.cache/
-whatif-frontend-new/node_modules/.cache/
-
-# vscode workspace (optional)
-.vscode/
