@@ -34,3 +34,15 @@ __pycache__/
 *.pyc
 EOF
 
+# frontend related node_modules & cache
+whatif-frontend-new/node_modules/
+whatif-frontend-new/.cache/
+whatif-frontend-new/.next/
+whatif-frontend-new/dist/
+whatif-frontend-new/build/
+
+# old frontend folder if not needed
+whatif-frontend/
+
+# IDE config
+.idea/
