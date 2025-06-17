@@ -1,0 +1,22 @@
+# Python-specific ignores
+__pycache__/
+*.pyc
+.venv/  # Ignore the virtual environment folder
+venv/   # Another common virtual environment folder name
+
+# Sensitive files (if located in backend root)
+serviceAccountKey.json # From your previous list, good to ignore if it's in the repo root
+
+# IDE ignores
+.idea/ # If your backend project uses .idea/
+
+# Ignore the *sibling* frontend project folder from backend's perspective
+/whatif-frontend-new/
+
+# Ignore Node.js modules (even if they appear in backend context)
+node_modules/
+
+# Other common ignores you might need for backend
+*.log
+temp/
+*.db # If you have local database files like sqlite
