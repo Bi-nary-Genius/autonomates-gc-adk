@@ -5,7 +5,7 @@ function LandingPage() {
   return (
     <div className="landing-page">
       <nav className="navbar">
-        <h1>What If AI App</h1>
+        <h1>WhatIf.AI </h1>
         <div className="nav-links">
           <a href="/dashboard">Dashboard</a>
           <a href="/about">About</a>
