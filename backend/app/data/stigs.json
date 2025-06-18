@@ -1,0 +1,18 @@
+{
+  "V-71991": {
+    "explanation": "This STIG ID requires that system administrators ensure user passwords expire after 60 days to prevent unauthorized access from old or compromised credentials.",
+    "example_fixes": {
+      "rhel8": "Edit /etc/login.defs and set PASS_MAX_DAYS 60.",
+      "windows": "Set maximum password age via Group Policy (gpedit.msc)."
+    },
+    "impact": "High"
+  },
+  "V-71992": {
+    "explanation": "This STIG ID requires all systems to implement a lockout policy for failed login attempts to prevent brute-force attacks.",
+    "example_fixes": {
+      "windows": "Configure account lockout policy in Group Policy Management Editor (secpol.msc).",
+      "rhel8": "Use faillock to lock accounts after N failed attempts."
+    },
+    "impact": "High"
+  }
+}
