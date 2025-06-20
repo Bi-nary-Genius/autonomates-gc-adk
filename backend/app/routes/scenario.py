@@ -1,26 +1,25 @@
+import os
+from typing import List, Optional
+import uuid
+
 from fastapi import APIRouter, File, UploadFile, HTTPException, Header, Form
 from app.auth import verify_id_token, db
 from firebase_admin import firestore
-import uuid
-from typing import List, Optional
 from google.cloud import vision, language_v1
 import google.generativeai as genai
 
 router = APIRouter()
 
-# Google AI Studio Key
-genai.configure(api_key="AIzaSyB_BrOTUK-dAo5eEu3JNy2-MGjp-nzc7tg")
+# === API Key Setup ===
+genai.configure(api_key=os.getenv("GOOGLE_GENAI_API_KEY"))
 
-# Gemini model id 
+# === AI Clients ===
 vertex_model = genai.GenerativeModel(model_name="models/gemini-1.5-flash")
-
-
-# vertex_model = genai.GenerativeModel(model_name="models/gemini-1.5-pro")
-
-# temporarily disabled vision_client = vision.ImageAnnotatorClient()
+vision_client = vision.ImageAnnotatorClient()
 language_client = language_v1.LanguageServiceClient()
 
-# Vision API
+
+# === Vision API ===
 def get_image_labels(image_bytes: bytes) -> list:
     try:
         image = vision.Image(content=image_bytes)
@@ -29,16 +28,18 @@ def get_image_labels(image_bytes: bytes) -> list:
             raise Exception(f"Vision API error: {response.error.message}")
         return [label.description for label in response.label_annotations]
     except Exception as e:
-        print(f"Error calling Vision AI: {e}")
-        raise Exception("Failed to get analysis from Vision AI.")
+        print(f"[Vision AI] Error: {e}")
+        raise Exception("Failed to get image analysis.")
 
-# Gemini Generative AI
+
+# === Gemini Generative AI ===
 def generate_scenario_story(prompt: str) -> str:
     full_prompt = f"Based on this memory: '{prompt}', generate an immersive 'What If' scenario story:"
     response = vertex_model.generate_content(full_prompt)
-    return response.text
+    return response.text if response.text else "[No content generated]"
 
-# Natural Language API
+
+# === Natural Language API ===
 def analyze_mood(text: str) -> str:
     document = language_v1.Document(content=text, type_=language_v1.Document.Type.PLAIN_TEXT)
     sentiment = language_client.analyze_sentiment(request={'document': document}).document_sentiment
@@ -51,7 +52,8 @@ def analyze_mood(text: str) -> str:
     else:
         return "nostalgic"
 
-# Create Scenario
+
+# === Main Endpoint ===
 @router.post("/")
 async def create_scenario(
         photos: Optional[List[UploadFile]] = File(None),
@@ -84,6 +86,7 @@ async def create_scenario(
             "ai_labels": ai_labels,
             "createdAt": firestore.SERVER_TIMESTAMP,
         }
+
         db.collection("scenarios").document(scenario_id).set(scenario_data)
 
         response_data = scenario_data.copy()
@@ -91,6 +94,7 @@ async def create_scenario(
         response_data.pop("createdAt", None)
 
         return response_data
+
     except Exception as e:
-        print(f"Create scenario error: {e}")
-        raise HTTPException(status_code=400, detail=f"Could not process request: {e}")
+        print(f"[Create Scenario] Error: {e}")
+        raise HTTPException(status_code=500, detail="Unable to process your request.")
