@@ -11,22 +11,22 @@ cryptography==45.0.3
 exceptiongroup==1.3.0
 fastapi==0.115.12
 firebase-admin==6.9.0
-google-generativeai==0.6.0
-google-api-core==2.25.0
-google-api-python-client==2.171.0
+google-generativeai # Removed version constraint
+google-api-core # Removed version constraint
+google-api-python-client # Removed version constraint
 google-auth==2.40.3
 google-auth-httplib2==0.2.0
 google-cloud-core==2.4.3
-google-cloud-firestore==2.21.0
+google-cloud-firestore # Removed version constraint
 google-cloud-storage==3.1.0
-google-cloud-vision==3.10.1
-google-cloud-language==2.12.0  # Added this line
-google-cloud-texttospeech==2.16.3
+google-cloud-vision # Removed version constraint
+google-cloud-language # Removed version constraint
+google-cloud-texttospeech # Removed version constraint
 google-crc32c==1.7.1
 google-resumable-media==2.7.2
-googleapis-common-protos==1.70.0
+googleapis-common-protos # Removed version constraint
 grpcio==1.73.0
-grpcio-status==1.73.0
+grpcio-status # Removed version constraint
 h11==0.16.0
 h2==4.2.0
 hpack==4.1.0
@@ -37,7 +37,8 @@ hyperframe==6.1.0
 idna==3.10
 msgpack==1.1.0
 proto-plus==1.26.1
-protobuf==6.31.1
+protobuf>=4.21.0,<5.0.0 # Kept your specified range
+
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pycparser==2.22
