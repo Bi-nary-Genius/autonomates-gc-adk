@@ -1,9 +1,6 @@
-
-
-
 .dashboard-layout {
   display: flex;
-  background-color: #121212;
+  background-color: #1c1c2c;
   color: #e0e0e0;
   min-height: 100vh;
   padding-top: 70px;
@@ -11,7 +8,6 @@
 
 .dashboard-main-content {
   flex-grow: 1;
-
   margin-left: 240px;
   padding: 2rem;
 }
@@ -21,8 +17,37 @@
   gap: 40px;
 }
 
+.dashboard-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  background-color: #2a2a40;
+  border-radius: 10px;
+  justify-content: center;
+}
 
+.tab {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-color: #282848;
+  color: #bdebdc; /* soft mint */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
+.tab:hover {
+  background-color: #39396c;
+  color: #ffffff;
+}
+
+.tab.active {
+  background-color: #bdebdc; /* mint */
+  color: #1c1c2c;
+  border: 2px solid #bdebdc;
+}
 
 .scenario-creator-panel {
   flex: 1;
