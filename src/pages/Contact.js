@@ -9,7 +9,15 @@ function Contact() {
         background: 'linear-gradient(to bottom right, #1d1c3b, #2a235b)',
       }}
     >
-      <h1 style={{ color: '#2af5d0', marginBottom: '2rem' }}>Meet the Creators</h1>
+      <h1
+  style={{
+    color: '#2af5d0',
+    marginBottom: '2rem',
+    textAlign: 'center'
+  }}
+>
+  Meet the Creators of WhatIf.AI
+</h1>
 
       <div
         style={{
@@ -19,6 +27,7 @@ function Contact() {
           marginBottom: '4rem',
         }}
       >
+
         {/* Sherie Chandler */}
         <div
           style={{
@@ -29,26 +38,13 @@ function Contact() {
             lineHeight: '1.6',
           }}
         >
-          <img
-            src="/images/sherie.jpeg"
-            alt="Sherie Chandler"
-            style={{
-              width: '100px',
-              height: '100px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: '2px solid #2af5d0',
-              marginBottom: '1rem',
-            }}
-          />
           <h3>Sherie Chandler</h3>
           <p style={{ color: '#ccc' }}>
             Co-Creator, Full-Stack & AI Developer, Product Strategist
           </p>
           <p><strong>Contribution to WhatIf.AI:</strong> Implemented authentication, UI, and Firestore integration. Connected Firebase to backend routes, deployed to custom domain, and integrated image classification with Vertex AI Vision. Implemented TTS agent and is developing STIG automation.</p>
           <p><strong>Key Skills:</strong> JavaScript, React, Firebase, FastAPI, Vertex AI, UX Design</p>
-          <p><strong>Why:</strong> I’m passionate about building real-time decision support systems that blend AI, intuitive UX, and strong security. I thrive on learning, designing intelligent agents, and exploring how ethical AI can empower people—not replace them—by preserving
-              meaningful, human-centered work.</p>
+          <p><strong>Why:</strong> I’m passionate about building real-time decision support systems that blend AI, intuitive UX, and strong security. I thrive on learning, designing intelligent agents, and exploring how ethical AI can empower people—not replace them—by preserving meaningful, human-centered work.</p>
           <p>
             <strong>Connect:</strong>{' '}
             <a
@@ -72,18 +68,6 @@ function Contact() {
             lineHeight: '1.6',
           }}
         >
-          <img
-            src="/images/chiussu.png"
-            alt="Chiu Ssu Hsieh"
-            style={{
-              width: '100px',
-              height: '100px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: '2px solid #2af5d0',
-              marginBottom: '1rem',
-            }}
-          />
           <h3>Chiu Ssu Hsieh</h3>
           <p style={{ color: '#ccc' }}>
             Co-Creator, Backend & AI Integrations Specialist

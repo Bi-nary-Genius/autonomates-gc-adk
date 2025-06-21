@@ -27,7 +27,7 @@ function NavigationBar({ user }) {
             gap: '10px',
             fontWeight: 'bold',
             fontSize: '1.3rem',
-            color: '#0088FF',
+            color: '#3d0170',
        }}
         > {/* <-- THIS IS THE CRUCIAL CHANGE: The closing `>` for Navbar.Brand's attributes */}
           {/* Now, the content (your div with text) goes inside the Navbar.Brand component */}
