@@ -32,8 +32,8 @@
 
 
 .sidebar ul li a.active {
-  background-color: #00f2ae; /* A light blue to indicate selection */
-  color: var(--primary-blue);
+  background-color: #d0d0d0;
+  color: #311b92;
   font-weight: bold;
 }
 
