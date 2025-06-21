@@ -3,7 +3,7 @@ from typing import List, Optional
 import uuid
 
 from fastapi import APIRouter, File, UploadFile, HTTPException, Header, Form
-from app.auth import verify_id_token, db
+from ..auth import verify_id_token, db
 from firebase_admin import firestore
 from google.cloud import vision, language_v1
 import google.generativeai as genai

@@ -1,20 +1,20 @@
+import os
+from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials, auth, firestore, storage
 from fastapi import HTTPException
 
-# Initialize Firebase Admin SDK
-cred = credentials.Certificate("serviceAccountKey.json")
+# Initialize Firebase Admin SDK using absolute path
+key_path = Path(__file__).resolve().parent.parent / "serviceAccountKey.json"
+cred = credentials.Certificate(str(key_path))
 
-# Bingo: The projectId is automatically inferred from the service account key file.
 firebase_admin.initialize_app(cred, {
-    'storageBucket': 'whatif-backend-462323.appspot.com'
+    'storageBucket': 'whatif-backend-462323.firebasestorage.app'
 })
 
-# Firestore database client
 db = firestore.client()
-
-# Firebase Storage bucket client
 bucket = storage.bucket()
+
 
 def verify_id_token(id_token: str) -> str:
     """
