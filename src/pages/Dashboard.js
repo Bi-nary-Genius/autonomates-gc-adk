@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import PhotoUploader from '../components/PhotoUploader';
 import STIGClarifier from '../components/STIGClarifier';
 import Card from '../components/Card';
 import EditModal from '../components/EditModal';
 import './Dashboard.css';
-
-const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
 function Dashboard({ user }) {
   const [activeTab, setActiveTab] = useState('scenario');
@@ -27,7 +25,7 @@ function Dashboard({ user }) {
       setFetchError(false);
       try {
         const idToken = await user.getIdToken();
-        const res = await fetch(`${API_BASE}/photo_upload/`, {
+        const res = await fetch('http://localhost:8000/photo_upload/', {
           headers: { 'id-token': idToken }
         });
         if (!res.ok) throw new Error('Failed to fetch scenarios');
@@ -47,7 +45,7 @@ function Dashboard({ user }) {
     if (!user) return alert("You must be logged in to delete scenarios.");
     try {
       const idToken = await user.getIdToken();
-      const response = await fetch(`${API_BASE}/photo_upload/${scenarioIdToDelete}`, {
+      const response = await fetch(`http://localhost:8000/photo_upload/${scenarioIdToDelete}`, {
         method: 'DELETE',
         headers: { 'id-token': idToken },
       });
@@ -81,7 +79,7 @@ function Dashboard({ user }) {
     if (!user) return alert("You must be logged in to save changes.");
     try {
       const idToken = await user.getIdToken();
-      const response = await fetch(`${API_BASE}/photo_upload/${updatedScenario.id}`, {
+      const response = await fetch(`http://localhost:8000/photo_upload/${updatedScenario.id}`, {
         method: 'PUT',
         headers: {
           'id-token': idToken,

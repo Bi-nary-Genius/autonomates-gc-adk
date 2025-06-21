@@ -3,7 +3,8 @@ import { useDropzone } from 'react-dropzone';
 import { getAuth } from "firebase/auth";
 import './PhotoUploader.css';
 
-const API_BASE = process.env.REACT_APP_BACKEND_URL;
+const API_BASE = "http://localhost:8000"; // SC: fallback since .env isn't loading
+
 
 export default function PhotoUploader({ onScenarioCreated, user }) {
   const [files, setFiles] = useState([]);
