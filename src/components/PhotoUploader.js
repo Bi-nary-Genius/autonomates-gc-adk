@@ -3,6 +3,8 @@ import { useDropzone } from 'react-dropzone';
 import { getAuth } from "firebase/auth";
 import './PhotoUploader.css';
 
+const API_BASE = process.env.REACT_APP_BACKEND_URL;
+
 export default function PhotoUploader({ onScenarioCreated, user }) {
   const [files, setFiles] = useState([]);
   const [title, setTitle] = useState('');
@@ -35,7 +37,6 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
     multiple: true,
   });
 
-  // --- Voice Recording Logic ---
   const handleRecordToggle = async () => {
     if (!isRecording) {
       try {
@@ -54,12 +55,10 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
       }
     } else {
       mediaRecorderRef.current.stop();
-      // The stream tracks are stopped in handleStopRecording
     }
   };
 
   const handleStopRecording = async () => {
-    // Stop all media tracks to turn off the microphone indicator
     mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
     setIsRecording(false);
 
@@ -67,10 +66,8 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
     const formData = new FormData();
     formData.append("file", audioBlob, "prompt.webm");
 
-    // TODO: Add backend call for Speech-to-Text here
     alert("Recording stopped. Speech-to-Text integration is the next step!");
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,16 +88,14 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
     formData.append('prompt', prompt);
 
     try {
-      const res = await fetch('http://localhost:8000/photo_upload/', {
+      const res = await fetch(`${API_BASE}/photo_upload/`, {
         method: 'POST',
         headers: { 'id-token': idToken },
         body: formData,
       });
       if (!res.ok) throw new Error('Upload failed');
-      const data
-          = await res.json();
-      /*testing for ai story generation*/
-      console.log("Generated:",data.scenario_generated);
+      const data = await res.json();
+      console.log("Generated:", data.scenario_generated);
       onScenarioCreated(data);
       setFiles([]);
       setTitle('');
@@ -116,8 +111,6 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
   return (
     <div className="photo-uploader-content">
       <form onSubmit={handleSubmit}>
-
-        {/* --- Section 1: Title --- */}
         <div className="form-section-box">
           <label htmlFor="title">Scenario Title</label>
           <input
@@ -130,30 +123,28 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
           />
         </div>
 
-        {/* --- Section 2: Prompt --- */}
         <div className="form-section-box">
-            <div className="prompt-header">
-                <label htmlFor="prompt">Your "What If" Prompt</label>
-                <button type="button" onClick={handleRecordToggle} className={`record-button ${isRecording ? 'recording' : ''}`}>
-                    {isRecording ? 'Stop' : 'Speak'} 🎙️
-                </button>
-            </div>
-            <textarea
-                id="prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder='Type or speak your prompt here...'
-                rows={4}
-            />
+          <div className="prompt-header">
+            <label htmlFor="prompt">Your "What If" Prompt</label>
+            <button type="button" onClick={handleRecordToggle} className={`record-button ${isRecording ? 'recording' : ''}`}>
+              {isRecording ? 'Stop' : 'Speak'} 🎙️
+            </button>
+          </div>
+          <textarea
+            id="prompt"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder='Type or speak your prompt here...'
+            rows={4}
+          />
         </div>
 
-        {/* --- Section 3: Photo Upload --- */}
         <div className="form-section-box">
-            <label>Optional: Add Photos</label>
-            <div {...getRootProps({ className: 'dropzone' })}>
-                <input {...getInputProps()} />
-                <p>Drag & drop images, or click to select (up to {maxFiles})</p>
-            </div>
+          <label>Optional: Add Photos</label>
+          <div {...getRootProps({ className: 'dropzone' })}>
+            <input {...getInputProps()} />
+            <p>Drag & drop images, or click to select (up to {maxFiles})</p>
+          </div>
         </div>
 
         {files.length > 0 && (
