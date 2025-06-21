@@ -97,7 +97,10 @@ export default function PhotoUploader({ onScenarioCreated, user }) {
         body: formData,
       });
       if (!res.ok) throw new Error('Upload failed');
-      const data = await res.json();
+      const data
+          = await res.json();
+      /*testing for ai story generation*/
+      console.log("Generated:",data.scenario_generated);
       onScenarioCreated(data);
       setFiles([]);
       setTitle('');

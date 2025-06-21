@@ -7,7 +7,8 @@ from pydantic import BaseModel
 import uuid
 
 # --- Configuration ---
-GCS_BUCKET_NAME = "whatif-backend-462323.firebasestorage.app"
+GCS_BUCKET_NAME = "whatif-backend-462323.appspot.com"
+
 
 
 # --- Pydantic Request Model ---
