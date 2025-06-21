@@ -13,7 +13,7 @@ firebase_admin.initialize_app(cred, {
 # Firestore database client
 db = firestore.client()
 
-# Firebase Storage bucket client (這是 photo_upload 會需要的)
+# Firebase Storage bucket client
 bucket = storage.bucket()
 
 def verify_id_token(id_token: str) -> str:
