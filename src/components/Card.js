@@ -2,13 +2,21 @@ import React from 'react';
 import './Card.css';
 
 // The component now accepts an 'isPlaying' prop to change the button's state
-function Card({ title, description, imageUrl, onDelete, onEdit, onPlay, isPlaying }) {
+function Card({ title, description, imageUrl, onDelete, onEdit, onPlay, isPlaying, story}) {
   return (
     <div className="card glass-panel">
       <img src={imageUrl} alt={`Visual representation for scenario: ${title}`} className="card-image" />
       <div className="card-body">
         <h3 className="card-title">{title}</h3>
         <p className="card-description">{description}</p>
+        
+        {story && (
+          <details className="card-story">
+            <h4>View AI-Generated Scenario</h4>
+            <p>{story}</p>
+          </details>
+        )}
+        
         <div className="card-actions">
           {/* This button's text and disabled state are now controlled by the parent. */}
           <button
