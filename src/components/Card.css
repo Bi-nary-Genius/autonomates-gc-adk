@@ -64,3 +64,18 @@
   border-color: rgba(255, 70, 70, 0.5);
   color: #ffc0c0;
 }
+
+.card-story {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  background: #f9f9f9;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.card-story summary {
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
