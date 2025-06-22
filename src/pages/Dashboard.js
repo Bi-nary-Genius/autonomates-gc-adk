@@ -147,6 +147,7 @@ function Dashboard({ user }) {
                         title={s.title}
                         description={s.prompt || (s.ai_labels?.length ? `AI tags: ${s.ai_labels.join(', ')}` : 'No description provided.')}
                         imageUrl={(s.imageUrls && s.imageUrls[0]) || "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg"}
+                        story={s.story}
                         onDelete={() => handleDelete(s.id)}
                         onPlay={() => handlePlayAudio(s)}
                         onEdit={() => handleOpenEditModal(s)}
