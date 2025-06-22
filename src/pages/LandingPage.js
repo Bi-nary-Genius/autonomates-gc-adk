@@ -1,11 +1,12 @@
 import React from "react";
 import "./LandingPage.css";
+// import Chatbot from '../components/Chatbot'; // You'd import your chatbot component here
 
 function LandingPage() {
   return (
     <div className="landing-page">
       <nav className="navbar">
-        <h1>WhatIf.AI </h1>
+        <h1>WhatIf.AI</h1>
         <div className="nav-links">
           <a href="/dashboard">Dashboard</a>
           <a href="/about">About</a>
@@ -14,18 +15,25 @@ function LandingPage() {
         </div>
       </nav>
 
+
       <section className="hero">
-        <h2>Imagine the Life You Could Live</h2>
+        <h2>What If You Could Simulate Smarter Decisions?</h2>
         <p>
-          What If is an AI-powered life simulator that brings your memories to life. Upload photos, record your voice, and watch as AI generates immersive ‘what if’ scenarios—narrated in your own voice. Explore how choices, like saving earlier or choosing a different path, could have changed your life. It’s interactive, personal, and blends financial literacy, emotional intelligence,
-            and storytelling in a way no other app does.
+          WhatIf.AI blends immersive storytelling with productivity automation. Upload a photo, ask a question, or simplify cybersecurity compliance—all through intelligent agents trained to help users think clearer and act faster.
         </p>
-        <a className="btn" href="/signin">Sign In</a>
+        <div className="cta-buttons">
+          <a className="btn" href="/dashboard">🎯 Try the Demo</a>
+          <a className="btn secondary" href="https://youtu.be/demo">▶️ Watch it in Action</a>
+        </div>
       </section>
 
+
       <footer>
-        <p>&copy; 2025 WhatIf App. All rights reserved.</p>
+        <p>© 2025 WhatIf.AI. All rights reserved.</p>
       </footer>
+
+      {/* Optional: Floating Chatbot Icon - This would be a separate component */}
+      {/* <Chatbot /> */}
     </div>
   );
 }
