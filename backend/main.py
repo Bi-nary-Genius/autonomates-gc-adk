@@ -19,8 +19,9 @@ print("👀 GOOGLE_APPLICATION_CREDENTIALS set to:", os.environ.get("GOOGLE_APPL
 # ✅ Only now do we import routes
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import scenario, tts, nlu, voice_cloning, photo_upload, stig_agent
-from app.auth import db
+from .app.routes import scenario, tts, nlu, voice_cloning, photo_upload, stig_agent
+from .app.auth import db
+
 
 # === FastAPI Setup ===
 app = FastAPI()

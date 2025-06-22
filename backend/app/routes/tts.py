@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Header
-from app.auth import verify_id_token, db
+from ..auth import verify_id_token, db
 from google.cloud import texttospeech
 from google.cloud.texttospeech import TextToSpeechClient, SynthesisInput, VoiceSelectionParams, AudioConfig, AudioEncoding
 from google.cloud import storage, firestore
