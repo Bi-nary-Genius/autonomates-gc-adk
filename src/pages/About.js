@@ -19,13 +19,13 @@ function About() {
 
       <p style={{ marginBottom: '2.5rem' }}>
         We're building a customizable, real-time AI tool that helps individuals and enterprises explore decisions and scenarios as they happen.
-        Whether you're wondering, “What if I changed careers?” or “What if my system failed a STIG audit?”, WhatIf.AI gives you immediate,
+        Whether you're wondering, “What if I changed careers?” or “What if my system failed a compliance audit?”, WhatIf.AI gives you immediate,
         intelligent feedback — powered by vision, voice, and emotional context.
       </p>
 
       <h2 style={{ color: '#2af5d0', marginBottom: '1rem' }}>Our Mission</h2>
       <p style={{ marginBottom: '2.5rem' }}>
-        To help people and organizations solve real-world problems instantly through interactive, AI-driven simulations — no waiting, no guessing.
+        To replace hours of confusion with seconds of clarity. WhatIf.AI is redefining how businesses interact with complex information by turning voice, image, and regulation into actionable insight—instantly.
       </p>
 
       <h2 style={{ color: '#2af5d0', marginBottom: '1rem' }}>What Makes Us Different</h2>
