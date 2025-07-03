@@ -10,6 +10,10 @@
 🌐 [Watch Demo Video](https://youtu.be/gO2sST58LZU?si=YFqsFDzK7xRzzCQp)  
 📦 GitHub Repo: [whatif-frontend-new](https://github.com/Bi-nary-Genius/autonomates-gc-adk.git)
 
+🔐 **Note:** Due to authentication restrictions and Firebase limits, direct login access is currently disabled.  
+However, the full functionality of WhatIf.AI — including AI scenario generation and STIG clarifier is demonstrated in the [demo video](https://youtu.be/gO2sST58LZU?si=YFqsFDzK7xRzzCQp).
+
+
 ---
 
 ## ⚡ Key Features
