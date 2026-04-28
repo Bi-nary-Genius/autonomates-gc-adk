@@ -24,6 +24,10 @@
 .env
 backend/.env
 
+# Secrets — never commit
+serviceAccountKey.json
+/firebase.js
+
 
 npm-debug.log*
 yarn-debug.log*

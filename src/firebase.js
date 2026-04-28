@@ -1,20 +1,22 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyC3fIzRSF3oPEqaiNQfT5nerr61uDJFU3s",
-  authDomain: "whatif-backend-462323.firebaseapp.com",
-  projectId: "whatif-backend-462323",
-  storageBucket: "whatif-backend-462323.firebasestorage.app",
-  messagingSenderId: "606118025900",
-  appId: "1:606118025900:web:5d5e34bb6edcec60fd5d09",
-  measurementId: "G-G60TG9KJ47"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const storage = getStorage(app);
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
-// Export the auth object so other files can use it
-export { auth };
+export { auth, storage, googleProvider, githubProvider };
