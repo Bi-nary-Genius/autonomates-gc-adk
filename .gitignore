@@ -28,6 +28,11 @@ backend/.env
 serviceAccountKey.json
 /firebase.js
 
+# STIG Clarifier — extracted to _stig_archive/, not part of WhatIf.AI
+src/components/STIGClarifier.js
+backend/app/routes/stig_agent.py
+backend/app/data/stigs.json
+
 
 npm-debug.log*
 yarn-debug.log*

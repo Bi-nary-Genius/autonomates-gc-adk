@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 # === Set up GOOGLE_APPLICATION_CREDENTIALS globally ===
 key_path = Path(__file__).resolve().parent / "serviceAccountKey.json"
@@ -19,7 +22,7 @@ print("👀 GOOGLE_APPLICATION_CREDENTIALS set to:", os.environ.get("GOOGLE_APPL
 # ✅ Only now do we import routes
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .app.routes import scenario, tts, nlu, voice_cloning, photo_upload, stig_agent
+from .app.routes import scenario, tts, nlu, voice_cloning, photo_upload
 from .app.auth import db
 
 
@@ -43,7 +46,6 @@ app.include_router(tts.router, prefix="/tts")
 app.include_router(nlu.router, prefix="/nlu")
 app.include_router(voice_cloning.router, prefix="/voice_cloning")
 app.include_router(photo_upload.router, prefix="/photo_upload")
-app.include_router(stig_agent.router, prefix="/stig")
 
 # === Root Test ===
 @app.get("/")
